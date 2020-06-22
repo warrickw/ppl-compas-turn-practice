@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>PPL - Compass Practice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            min-height: 100vh;
+            width: 100vw;
+            justify-content: center;
+            font-family: Verdana, Geneva, sans-serif;
+            background: #ededed;
+        }
+
+        button {
+            padding: 10px 30px;
+            font-size: 17px;
+            background: #fdfdfd;
+            border: 1.5px solid #f0f0f0;
+            border-radius: 8px;
+            color: #3f3f3f;
+            outline: none;
+        }
+
+        button.correct {
+            background-color: #69c269;
+            color: white;
+            border: none;
+        }
+
+        button.incorrect {
+            background-color: #f63f3f;
+            color: white;
+            border: none;
+        }
+
+        .body-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 11px;
+            -webkit-box-shadow: 3px 3px 21px -6px rgba(0, 0, 0, 0.33);
+            -moz-box-shadow: 3px 3px 21px -6px rgba(0, 0, 0, 0.33);
+            box-shadow: 3px 3px 21px -6px rgba(0, 0, 0, 0.33);
+            text-align: center;
+            margin: 10px;
+        }
+
+        .row {
+            margin-bottom: 30px;
+        }
+
+        input {
+            font-size: 17px;
+            padding: 10px;
+            background: #fdfdfd;
+            border: 1.5px solid #f0f0f0;
+            border-radius: 8px;
+            color: #3f3f3f;
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+
+        #target_heading_input {
+            text-align: center;
+            width: 144px;
+        }
+
+        #submit {
+            margin-top: 35px;
+        }
+
+        h1 {
+            margin-top: 3px;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            padding: 19px;
+            width: 300px;
+            border-radius: 10px;
+            color: #474747;
+            margin-top: 20px;
+        }
+
+        #correct-badge {
+            background: #2cbd2c3d;
+        }
+
+        #incorrect-badge {
+            background: #ff30303d;
+        }
+
+        .badge-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+
+    <script type="application/javascript">
+        let should_turn_right;
+        let target_overshoot;
+        let rollout_heading;
+        let el_currentHeading;
+        let el_targetHeading;
+        let el_left;
+        let el_right;
+        let el_overshoot;
+        let el_undershoot;
+        let el_target_heading_input;
+        let el_correct_badge;
+        let el_incorrect_badge;
+
+        window.onload = function () {
+            el_currentHeading = document.getElementById("current_heading");
+            el_targetHeading = document.getElementById("target_heading");
+            el_left = document.getElementById("turn_left");
+            el_right = document.getElementById("turn_right");
+            el_overshoot = document.getElementById("overshoot");
+            el_undershoot = document.getElementById("undershoot");
+            el_target_heading_input = document.getElementById("target_heading_input");
+            el_correct_badge = document.getElementById("correct-badge");
+            el_incorrect_badge = document.getElementById("incorrect-badge");
+
+            init();
+        };
+
+        function init() {
+            el_left.className = "";
+            el_right.className = "";
+            el_overshoot.className = "";
+            el_undershoot.className = "";
+            el_target_heading_input.value = "";
+
+            el_correct_badge.style.display = "none";
+            el_incorrect_badge.style.display = "none";
+
+            let current_heading = Math.floor(Math.random() * 12) * 30;
+            let target_heading = Math.floor(Math.random() * 12) * 30;
+
+            //  Don't allow the same heading
+            while (current_heading == target_heading) {
+                current_heading = Math.floor(Math.random() * 12) * 30;
+                target_heading = Math.floor(Math.random() * 12) * 30;
+            }
+
+            el_currentHeading.innerText = ("00" + current_heading).slice(-3);
+            el_targetHeading.innerText = ("00" + target_heading).slice(-3);
+
+            let math_target_heading = target_heading
+            if (math_target_heading < current_heading)
+                math_target_heading += 360
+
+            should_turn_right = math_target_heading - current_heading <= 180;
+
+            target_overshoot = Math.abs(target_heading % 180 - 90) * 30 / 90;
+
+            if (90 <= target_heading <= 270)
+                target_overshoot = -target_overshoot;
+
+            if (should_turn_right)
+                target_heading += target_overshoot;
+            else
+                target_heading -= target_overshoot;
+
+            if (target_heading < 0)
+                target_heading += 360;
+
+            rollout_heading = target_heading;
+        }
+
+
+        function pickDirection(dir) {
+            el_left.className = "";
+            el_right.className = "";
+
+            if (dir == "left") {
+                if (should_turn_right)
+                    el_left.classList.add("incorrect");
+                else
+                    el_left.classList.add("correct");
+            }
+            else {
+                if (should_turn_right)
+                    el_right.classList.add("correct");
+                else
+                    el_right.classList.add("incorrect");
+            }
+        }
+
+        function pickOvershoot(overshoot) {
+            el_overshoot.className = "";
+            el_undershoot.className = "";
+
+            if (overshoot) {
+                if (target_overshoot < 0)
+                    el_overshoot.classList.add("incorrect");
+                else
+                    el_overshoot.classList.add("correct");
+
+            }
+            else {
+                if (target_overshoot > 0)
+                    el_undershoot.classList.add("incorrect");
+                else
+                    el_undershoot.classList.add("correct");
+            }
+        }
+
+        function submit() {
+            let wasFailBefore = el_incorrect_badge.style.display == "block";
+
+            el_incorrect_badge.style.display = "none";
+
+            if (el_target_heading_input.value == rollout_heading) {
+                el_correct_badge.style.display = "block";
+
+                setTimeout(init, 1000);
+            }
+            else {
+                setTimeout(function () {
+                    el_incorrect_badge.style.display = "block";
+                }, wasFailBefore ? 150 : 0);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="body-container">
+        <h1>PPL - Compass turn practice</h1>
+        <div class="row">
+            <p>
+                You are on heading <strong><span id="current_heading"></span>&deg;</strong>, and you want to make a turn
+                to heading <strong><span id="target_heading"></span>&deg;</strong>
+            </p>
+        </div>
+        <div class="row">
+            <p>Should you turn left or right?</p>
+            <button id="turn_left" onclick="pickDirection('left')">Left</button>
+            <button id="turn_right" onclick="pickDirection('right')">Right</button>
+        </div>
+        <div class="row">
+            <p>Should you overshoot or undershoot the heading?</p>
+            <button id="undershoot" onclick="pickOvershoot(false)">Undershoot</button>
+            <button id="overshoot" onclick="pickOvershoot(true)">Overshoot</button>
+        </div>
+        <div class="row" style="margin-bottom: 0;">
+            <p>What heading should you roll out on?</p>
+
+            <div>
+                <input id="target_heading_input" type="number" placeholder="Type heading..." />
+            </div>
+
+            <div class="badge-container">
+                <div class="badge" id="correct-badge">
+                    Correct!
+                </div>
+                <div class="badge" id="incorrect-badge">
+                    Incorrect!
+                </div>
+            </div>
+
+            <button id="submit" onclick="submit()">Submit</button>
+        </div>
+    </div>
+</body>
+
+</html>
